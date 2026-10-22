@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: cd-oropesa-api
+  profiles:
+    active: local

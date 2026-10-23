@@ -1,0 +1,726 @@
+openapi: 3.0.3
+info:
+  title: CD Oropesa API
+  description: API oficial para la gestión integral del CD Oropesa (Monolito Modular con Spring Boot y PostgreSQL).
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Servidor de Desarrollo Local
+
+tags:
+  - name: Seasons
+    description: Gestión de Temporadas del club
+  - name: Categories
+    description: Categorías base de competición
+  - name: Teams
+    description: Equipos federados por temporada
+  - name: Players
+    description: Maestro de Jugadores y fichas
+  - name: Coaches
+    description: Maestro de Entrenadores y técnicos
+  - name: Venues
+    description: Instalaciones deportivas y campos
+  - name: Matches
+    description: Calendario y resultados de partidos
+  - name: Standings
+    description: Tablas de clasificación
+
+paths:
+  # ==========================================
+  # SEASONS
+  # ==========================================
+  /seasons:
+    get:
+      tags: [Seasons]
+      summary: Listar todas las temporadas
+      operationId: getAllSeasons
+      responses:
+        '200':
+          description: Lista de temporadas obtenida con éxito
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SeasonResponse'
+    post:
+      tags: [Seasons]
+      summary: Crear una nueva temporada
+      operationId: createSeason
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SeasonRequest'
+      responses:
+        '201':
+          description: Temporada creada con éxito
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SeasonResponse'
+
+  /seasons/{id}:
+    get:
+      tags: [Seasons]
+      summary: Obtener una temporada por ID
+      operationId: getSeasonById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Temporada encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SeasonResponse'
+        '404':
+          description: Temporada no encontrada
+    delete:
+      tags: [Seasons]
+      summary: Eliminar una temporada
+      operationId: deleteSeason
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Temporada eliminada con éxito
+
+  # ==========================================
+  # CATEGORIES
+  # ==========================================
+  /categories:
+    get:
+      tags: [Categories]
+      summary: Listar todas las categorías
+      operationId: getAllCategories
+      responses:
+        '200':
+          description: Lista obtenida con éxito
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CategoryResponse'
+    post:
+      tags: [Categories]
+      summary: Crear una categoría
+      operationId: createCategory
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryRequest'
+      responses:
+        '201':
+          description: Creada con éxito
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryResponse'
+
+  # ==========================================
+  # TEAMS
+  # ==========================================
+  /teams:
+    get:
+      tags: [Teams]
+      summary: Listar todos los equipos
+      operationId: getAllTeams
+      responses:
+        '200':
+          description: Lista obtenida con éxito
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TeamResponse'
+    post:
+      tags: [Teams]
+      summary: Crear un equipo
+      operationId: createTeam
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TeamRequest'
+      responses:
+        '201':
+          description: Creado con éxito
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamResponse'
+
+  # ==========================================
+  # PLAYERS
+  # ==========================================
+  /players:
+    get:
+      tags: [Players]
+      summary: Listar todos los jugadores del club
+      operationId: getAllPlayers
+      responses:
+        '200':
+          description: Lista obtenida con éxito
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PlayerResponse'
+    post:
+      tags: [Players]
+      summary: Registrar un nuevo jugador
+      operationId: createPlayer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlayerRequest'
+      responses:
+        '201':
+          description: Jugador registrado con éxito
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlayerResponse'
+
+  /players/{id}:
+    get:
+      tags: [Players]
+      summary: Obtener detalle de un jugador por ID
+      operationId: getPlayerById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Jugador encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlayerResponse'
+        '404':
+          description: No encontrado
+    put:
+      tags: [Players]
+      summary: Actualizar datos de un jugador
+      operationId: updatePlayer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlayerRequest'
+      responses:
+        '200':
+          description: Actualizado con éxito
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlayerResponse'
+    delete:
+      tags: [Players]
+      summary: Dar de baja/eliminar un jugador
+      operationId: deletePlayer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Eliminado con éxito
+
+  # ==========================================
+  # COACHES
+  # ==========================================
+  /coaches:
+    get:
+      tags: [Coaches]
+      summary: Listar entrenadores
+      operationId: getAllCoaches
+      responses:
+        '200':
+          description: Lista obtenida con éxito
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CoachResponse'
+    post:
+      tags: [Coaches]
+      summary: Registrar un entrenador
+      operationId: createCoach
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CoachRequest'
+      responses:
+        '201':
+          description: Creado con éxito
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CoachResponse'
+
+  # ==========================================
+  # VENUES
+  # ==========================================
+  /venues:
+    get:
+      tags: [Venues]
+      summary: Listar instalaciones deportivas
+      operationId: getAllVenues
+      responses:
+        '200':
+          description: Lista obtenida con éxito
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VenueResponse'
+    post:
+      tags: [Venues]
+      summary: Registrar una instalación
+      operationId: createVenue
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VenueRequest'
+      responses:
+        '201':
+          description: Creado con éxito
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VenueResponse'
+
+  # ==========================================
+  # MATCHES
+  # ==========================================
+  /matches:
+    get:
+      tags: [Matches]
+      summary: Listar partidos programados y jugados
+      operationId: getAllMatches
+      responses:
+        '200':
+          description: Lista obtenida con éxito
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MatchResponse'
+    post:
+      tags: [Matches]
+      summary: Programar un nuevo partido
+      operationId: createMatch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MatchRequest'
+      responses:
+        '201':
+          description: Programado con éxito
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatchResponse'
+
+  # ==========================================
+  # STANDINGS
+  # ==========================================
+  /standings:
+    get:
+      tags: [Standings]
+      summary: Obtener tablas de clasificación
+      operationId: getAllStandings
+      responses:
+        '200':
+          description: Lista obtenida con éxito
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StandingResponse'
+
+components:
+  schemas:
+    # --- SEASONS ---
+    SeasonRequest:
+      type: object
+      required: [name, startDate, endDate]
+      properties:
+        name:
+          type: string
+          example: "2025/2026"
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        isCurrent:
+          type: boolean
+          default: false
+
+    SeasonResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        isCurrent:
+          type: boolean
+
+    # --- CATEGORIES ---
+    CategoryRequest:
+      type: object
+      required: [name, gender]
+      properties:
+        name:
+          type: string
+          example: "Cadete A"
+        gender:
+          type: string
+          enum: [MALE, FEMALE, MIXED]
+        minAge:
+          type: integer
+          example: 14
+        maxAge:
+          type: integer
+          example: 16
+
+    CategoryResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        gender:
+          type: string
+        minAge:
+          type: integer
+        maxAge:
+          type: integer
+
+    # --- TEAMS ---
+    TeamRequest:
+      type: object
+      required: [categoryId, seasonId, name]
+      properties:
+        categoryId:
+          type: string
+          format: uuid
+        seasonId:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: "CD Oropesa Cadete A"
+        groupName:
+          type: string
+          example: "Grupo 1 Provincial"
+
+    TeamResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        groupName:
+          type: string
+        category:
+          $ref: '#/components/schemas/CategoryResponse'
+        season:
+          $ref: '#/components/schemas/SeasonResponse'
+
+    # --- PLAYERS ---
+    PlayerRequest:
+      type: object
+      required: [firstName, lastName, birthDate]
+      properties:
+        firstName:
+          type: string
+          example: "Alejandro"
+        lastName:
+          type: string
+          example: "García"
+        birthDate:
+          type: string
+          format: date
+        dni:
+          type: string
+          example: "12345678X"
+        licenseNumber:
+          type: string
+          example: "LIC-98765"
+        address:
+          type: string
+          example: "Calle Mayor 12"
+        photoUrl:
+          type: string
+        dniFileUrl:
+          type: string
+        gdprConsent:
+          type: boolean
+          default: false
+        guardianName:
+          type: string
+        guardianPhone:
+          type: string
+        guardianEmail:
+          type: string
+
+    PlayerResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        firstName:
+          type: string
+        lastName:
+          type: string
+        birthDate:
+          type: string
+          format: date
+        dni:
+          type: string
+        licenseNumber:
+          type: string
+        address:
+          type: string
+        photoUrl:
+          type: string
+        gdprConsent:
+          type: boolean
+        guardianName:
+          type: string
+        guardianPhone:
+          type: string
+        guardianEmail:
+          type: string
+
+    # --- COACHES ---
+    CoachRequest:
+      type: object
+      required: [firstName, lastName, dni, phone, email]
+      properties:
+        userId:
+          type: string
+          format: uuid
+        firstName:
+          type: string
+        lastName:
+          type: string
+        dni:
+          type: string
+        phone:
+          type: string
+        address:
+          type: string
+        email:
+          type: string
+        licenseNumber:
+          type: string
+        qualification:
+          type: string
+        status:
+          type: string
+          enum: [ACTIVE, INACTIVE]
+
+    CoachResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        firstName:
+          type: string
+        lastName:
+          type: string
+        dni:
+          type: string
+        phone:
+          type: string
+        address:
+          type: string
+        email:
+          type: string
+        qualification:
+          type: string
+        status:
+          type: string
+
+    # --- VENUES ---
+    VenueRequest:
+      type: object
+      required: [name, city]
+      properties:
+        name:
+          type: string
+          example: "Campo Municipal de Oropesa"
+        address:
+          type: string
+        city:
+          type: string
+          example: "Oropesa"
+        isHomeVenue:
+          type: boolean
+          default: false
+        surfaceType:
+          type: string
+          example: "Césped Artificial"
+        googleMapsUrl:
+          type: string
+        imageUrl:
+          type: string
+        notes:
+          type: string
+
+    VenueResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        address:
+          type: string
+        city:
+          type: string
+        isHomeVenue:
+          type: boolean
+        surfaceType:
+          type: string
+
+    # --- MATCHES ---
+    MatchRequest:
+      type: object
+      required: [teamId, opponentId, venueId, matchday, matchDate]
+      properties:
+        teamId:
+          type: string
+          format: uuid
+        opponentId:
+          type: string
+          format: uuid
+        venueId:
+          type: string
+          format: uuid
+        matchday:
+          type: integer
+        matchDate:
+          type: string
+          format: date
+        matchTime:
+          type: string
+          example: "17:00:00"
+        homeScore:
+          type: integer
+        awayScore:
+          type: integer
+        status:
+          type: string
+          enum: [SCHEDULED, COMPLETED, SUSPENDED, POSTPONED]
+
+    MatchResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        matchday:
+          type: integer
+        matchDate:
+          type: string
+          format: date
+        matchTime:
+          type: string
+        homeScore:
+          type: integer
+        awayScore:
+          type: integer
+        status:
+          type: string
+
+    # --- STANDINGS ---
+    StandingResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        opponentName:
+          type: string
+        played:
+          type: integer
+        won:
+          type: integer
+        drawn:
+          type: integer
+        lost:
+          type: integer
+        goalsFor:
+          type: integer
+        goalsAgainst:
+          type: integer
+        points:
+          type: integer
+        position:
+          type: integer

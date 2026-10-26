@@ -21,10 +21,10 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
-  @Value("${application.security.jwt.secret-key:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}")
+  @Value("${application.security.jwt.secret-key}")
   private String secretKey;
 
-  @Value("${application.security.jwt.expiration:86400000}") // 24 horas por defecto
+  @Value("${application.security.jwt.expiration:900000}") // 15 minutos por defecto
   private long jwtExpiration;
 
   /**
@@ -53,7 +53,7 @@ public class JwtService {
   /**
    * Genera un token JWT para un usuario autenticado.
    *
-   * @detalles userDetails Detalles del usuario del sistema.
+   * @param userDetails Detalles del usuario del sistema.
    * @return Token JWT generado como cadena de texto.
    */
   public String generateToken(UserDetails userDetails) {

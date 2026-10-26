@@ -20,6 +20,7 @@
 		<lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
 		<openapi-generator.version>7.4.0</openapi-generator.version>
 		<springdoc.version>2.3.0</springdoc.version>
+		<jwt.version>0.12.5</jwt.version>
 	</properties>
 
 	<dependencies>
@@ -28,6 +29,25 @@
 			<groupId>org.mapstruct</groupId>
 			<artifactId>mapstruct</artifactId>
 			<version>${mapstruct.version}</version>
+		</dependency>
+
+		<!-- JJWT (JSON Web Token para Spring Security) -->
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-api</artifactId>
+			<version>${jwt.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-impl</artifactId>
+			<version>${jwt.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-jackson</artifactId>
+			<version>${jwt.version}</version>
+			<scope>runtime</scope>
 		</dependency>
 
 		<!-- SpringDoc OpenAPI UI (Para ver la documentación interactiva en /swagger-ui/index.html) -->

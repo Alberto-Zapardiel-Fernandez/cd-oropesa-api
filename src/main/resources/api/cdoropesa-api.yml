@@ -131,6 +131,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CategoryResponse'
+  /categories/{id}:
+    delete:
+      summary: Eliminar una categoría
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Categoría eliminada con éxito
 
   # ==========================================
   # TEAMS

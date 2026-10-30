@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Controlador REST para la gestión de Categorías base de competición.
@@ -47,6 +48,18 @@ public class CategoryController implements CategoriesApi {
   public ResponseEntity<List<CategoryResponse>> getAllCategories() {
     List<Category> categories = this.categoryService.findAllCategories();
     return ResponseEntity.ok(this.categoryMapper.toResponseList(categories));
+  }
+
+  /**
+   * DELETE /categories/{id} : Eliminar una categoría
+   *
+   * @param id (required)
+   * @return Categoría eliminada con éxito (status code 204)
+   */
+  @Override
+  public ResponseEntity<Void> categoriesIdDelete(UUID id) {
+    this.categoryService.deleteCategory(id);
+    return ResponseEntity.noContent().build();
   }
 
   /**

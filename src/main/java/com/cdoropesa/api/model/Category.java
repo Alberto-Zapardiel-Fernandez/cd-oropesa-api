@@ -1,6 +1,6 @@
 package com.cdoropesa.api.model;
 
-import com.cdoropesa.api.model.enums.GenderType;
+import com.cdoropesa.api.dto.CategoryRequest;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -47,8 +47,9 @@ public class Category {
    * Tipo de género asignado a la categoría (MALE, FEMALE, MIXED).
    */
   @Enumerated(EnumType.STRING)
-  @Column(nullable = false)
-  private GenderType gender;
+  @Column(name = "gender", columnDefinition = "gender_type", nullable = false)
+  @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.NAMED_ENUM)
+  private CategoryRequest.GenderEnum gender;
 
   /**
    * Edad mínima permitida para pertenecer a la categoría.

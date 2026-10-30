@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Controlador REST para la gestión de Equipos federados por temporada.
@@ -60,6 +61,18 @@ public class TeamController implements TeamsApi {
   public ResponseEntity<List<TeamResponse>> getAllTeams() {
     List<Team> teams = this.teamService.findAllTeams();
     return ResponseEntity.ok(this.teamMapper.toResponseList(teams));
+  }
+
+  /**
+   * DELETE /teams/{id}: Eliminar un equipo
+   *
+   * @param id (required)
+   * @return Equipo eliminado con éxito (status code 204)
+   */
+  @Override
+  public ResponseEntity<Void> teamsIdDelete(UUID id) {
+    teamService.deleteTeam(id);
+    return ResponseEntity.noContent().build();
   }
 
   /**

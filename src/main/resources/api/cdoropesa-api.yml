@@ -179,6 +179,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TeamResponse'
+  /teams/{id}:
+    delete:
+      summary: Eliminar un equipo
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Equipo eliminado con éxito
 
   # ==========================================
   # PLAYERS

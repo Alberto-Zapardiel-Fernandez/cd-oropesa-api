@@ -1,6 +1,7 @@
 package com.cdoropesa.api.repository;
 
 import com.cdoropesa.api.model.Opponent;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -14,5 +15,5 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface OpponentRepository extends JpaRepository<Opponent, UUID> {
-  // Se añadirán consultas personalizadas según se requieran.
+  List<Opponent> findByNameContainingIgnoreCase(String name);
 }

@@ -41,6 +41,20 @@ public class OpponentService {
   }
 
   /**
+   * Busca rivales cuyo nombre contiene el texto indicado, sin distinguir mayúsculas.
+   *
+   * @param search Texto que se busca en el nombre del rival.
+   * @return Lista de rivales coincidentes.
+   */
+  @Transactional(readOnly = true)
+  public List<Opponent> findOpponentsByName(String search) {
+    if (search == null || search.isBlank()) {
+      return this.findAllOpponents();
+    }
+    return this.opponentRepository.findByNameContainingIgnoreCase(search.trim());
+  }
+
+  /**
    * Busca un club rival específico por su identificador único UUID.
    *
    * @param id Identificador único del rival.

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Controlador REST para la gestión de las instalaciones deportivas y campos del club.
@@ -60,5 +61,34 @@ public class VenueController implements VenuesApi {
     Venue venue = this.venueMapper.toEntity(venueRequest);
     Venue saved = this.venueService.saveVenue(venue);
     return ResponseEntity.status(HttpStatus.CREATED).body(this.venueMapper.toResponse(saved));
+  }
+
+  @Override
+  public ResponseEntity<VenueResponse> getVenueById(UUID id) {
+    return this.venueService.findVenueById(id)
+        .map(venue -> ResponseEntity.ok(this.venueMapper.toResponse(venue)))
+        .orElse(ResponseEntity.notFound().build());
+  }
+
+  @Override
+  public ResponseEntity<VenueResponse> updateVenue(UUID id, VenueRequest venueRequest) {
+    return this.venueService.findVenueById(id)
+        .map(existingVenue -> {
+          Venue updatedVenue = this.venueMapper.toEntity(venueRequest);
+          updatedVenue.setId(existingVenue.getId());
+          updatedVenue.setCreatedAt(existingVenue.getCreatedAt());
+          Venue saved = this.venueService.saveVenue(updatedVenue);
+          return ResponseEntity.ok(this.venueMapper.toResponse(saved));
+        })
+        .orElse(ResponseEntity.notFound().build());
+  }
+
+  @Override
+  public ResponseEntity<Void> deleteVenue(UUID id) {
+    if (this.venueService.findVenueById(id).isEmpty()) {
+      return ResponseEntity.notFound().build();
+    }
+    this.venueService.deleteVenue(id);
+    return ResponseEntity.noContent().build();
   }
 }

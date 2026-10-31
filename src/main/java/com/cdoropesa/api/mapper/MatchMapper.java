@@ -27,6 +27,9 @@ public interface MatchMapper {
    * @param match Entidad JPA Match.
    * @return DTO MatchResponse para la API.
    */
+  @Mapping(target = "teamId", source = "team.id")
+  @Mapping(target = "opponentId", source = "opponent.id")
+  @Mapping(target = "venueId", source = "venue.id")
   MatchResponse toResponse(Match match);
 
   /**
@@ -53,4 +56,5 @@ public interface MatchMapper {
   @Mapping(target = "opponent", source = "opponent")
   @Mapping(target = "venue", source = "venue")
   Match toEntity(MatchRequest request, Team team, Opponent opponent, Venue venue);
+
 }

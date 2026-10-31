@@ -5,13 +5,17 @@ import com.cdoropesa.api.dto.CoachResponse;
 import com.cdoropesa.api.generated.CoachesApi;
 import com.cdoropesa.api.mapper.CoachMapper;
 import com.cdoropesa.api.model.Coach;
+import com.cdoropesa.api.model.Profile;
+import com.cdoropesa.api.model.enums.CoachStatus;
 import com.cdoropesa.api.service.CoachService;
+import com.cdoropesa.api.service.ProfileService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Controlador REST para la gestión del maestro de Entrenadores del club.
@@ -25,6 +29,7 @@ import java.util.List;
 public class CoachController implements CoachesApi {
 
   private final CoachService coachService;
+  private final ProfileService profileService;
   private final CoachMapper coachMapper;
 
   /**
@@ -33,8 +38,10 @@ public class CoachController implements CoachesApi {
    * @param coachService Servicio de lógica de negocio para entrenadores.
    * @param coachMapper Mapeador MapStruct entre entidades y DTOs.
    */
-  public CoachController(CoachService coachService, CoachMapper coachMapper) {
+  public CoachController(
+      CoachService coachService, ProfileService profileService, CoachMapper coachMapper) {
     this.coachService = coachService;
+    this.profileService = profileService;
     this.coachMapper = coachMapper;
   }
 
@@ -58,7 +65,59 @@ public class CoachController implements CoachesApi {
   @Override
   public ResponseEntity<CoachResponse> createCoach(CoachRequest coachRequest) {
     Coach coach = this.coachMapper.toEntity(coachRequest);
+    Profile profile = findProfile(coachRequest.getUserId());
+    if (coachRequest.getUserId() != null && profile == null) {
+      return ResponseEntity.badRequest().build();
+    }
+    coach.setUser(profile);
+    if (coach.getStatus() == null) {
+      coach.setStatus(CoachStatus.ACTIVE);
+    }
     Coach saved = this.coachService.saveCoach(coach);
     return ResponseEntity.status(HttpStatus.CREATED).body(this.coachMapper.toResponse(saved));
+  }
+
+  @Override
+  public ResponseEntity<CoachResponse> getCoachById(UUID id) {
+    return this.coachService.findCoachById(id)
+        .map(coach -> ResponseEntity.ok(this.coachMapper.toResponse(coach)))
+        .orElse(ResponseEntity.notFound().build());
+  }
+
+  @Override
+  public ResponseEntity<CoachResponse> updateCoach(UUID id, CoachRequest coachRequest) {
+    return this.coachService.findCoachById(id)
+        .map(existingCoach -> {
+          Profile profile = findProfile(coachRequest.getUserId());
+          if (coachRequest.getUserId() != null && profile == null) {
+            return ResponseEntity.badRequest().<CoachResponse>build();
+          }
+
+          Coach updatedCoach = this.coachMapper.toEntity(coachRequest);
+          updatedCoach.setId(existingCoach.getId());
+          updatedCoach.setCreatedAt(existingCoach.getCreatedAt());
+          updatedCoach.setPhotoUrl(existingCoach.getPhotoUrl());
+          updatedCoach.setDniFileUrl(existingCoach.getDniFileUrl());
+          updatedCoach.setUser(profile);
+          if (updatedCoach.getStatus() == null) {
+            updatedCoach.setStatus(CoachStatus.ACTIVE);
+          }
+          Coach saved = this.coachService.saveCoach(updatedCoach);
+          return ResponseEntity.ok(this.coachMapper.toResponse(saved));
+        })
+        .orElse(ResponseEntity.notFound().build());
+  }
+
+  @Override
+  public ResponseEntity<Void> deleteCoach(UUID id) {
+    if (this.coachService.findCoachById(id).isEmpty()) {
+      return ResponseEntity.notFound().build();
+    }
+    this.coachService.deleteCoach(id);
+    return ResponseEntity.noContent().build();
+  }
+
+  private Profile findProfile(UUID id) {
+    return id == null ? null : this.profileService.findProfileById(id).orElse(null);
   }
 }

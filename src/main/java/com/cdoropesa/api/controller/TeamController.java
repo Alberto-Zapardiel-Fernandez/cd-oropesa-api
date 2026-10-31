@@ -63,15 +63,40 @@ public class TeamController implements TeamsApi {
     return ResponseEntity.ok(this.teamMapper.toResponseList(teams));
   }
 
-  /**
-   * DELETE /teams/{id}: Eliminar un equipo
-   *
-   * @param id (required)
-   * @return Equipo eliminado con éxito (status code 204)
-   */
   @Override
-  public ResponseEntity<Void> teamsIdDelete(UUID id) {
-    teamService.deleteTeam(id);
+  public ResponseEntity<TeamResponse> getTeamById(UUID id) {
+    return this.teamService.findTeamById(id)
+        .map(team -> ResponseEntity.ok(this.teamMapper.toResponse(team)))
+        .orElse(ResponseEntity.notFound().build());
+  }
+
+  @Override
+  public ResponseEntity<TeamResponse> updateTeam(UUID id, TeamRequest teamRequest) {
+    return this.teamService.findTeamById(id)
+        .map(existingTeam -> {
+          Category category = this.categoryService
+              .findCategoryById(teamRequest.getCategoryId()).orElse(null);
+          Season season = this.seasonService
+              .findSeasonById(teamRequest.getSeasonId()).orElse(null);
+          if (category == null || season == null) {
+            return ResponseEntity.badRequest().<TeamResponse>build();
+          }
+
+          Team updatedTeam = this.teamMapper.toEntity(teamRequest, category, season);
+          updatedTeam.setId(existingTeam.getId());
+          updatedTeam.setCreatedAt(existingTeam.getCreatedAt());
+          Team saved = this.teamService.saveTeam(updatedTeam);
+          return ResponseEntity.ok(this.teamMapper.toResponse(saved));
+        })
+        .orElse(ResponseEntity.notFound().build());
+  }
+
+  @Override
+  public ResponseEntity<Void> deleteTeam(UUID id) {
+    if (this.teamService.findTeamById(id).isEmpty()) {
+      return ResponseEntity.notFound().build();
+    }
+    this.teamService.deleteTeam(id);
     return ResponseEntity.noContent().build();
   }
 

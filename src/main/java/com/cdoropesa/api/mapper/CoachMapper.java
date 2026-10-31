@@ -24,6 +24,7 @@ public interface CoachMapper {
    * @param coach Entidad JPA Coach.
    * @return DTO CoachResponse para la API.
    */
+  @Mapping(target = "userId", source = "user.id")
   CoachResponse toResponse(Coach coach);
 
   /**
@@ -43,7 +44,6 @@ public interface CoachMapper {
    */
   @Mapping(target = "id", ignore = true)
   @Mapping(target = "createdAt", ignore = true)
-  @Mapping(target = "phone", ignore = true)
   @Mapping(target = "user", ignore = true)
   @Mapping(target = "photoUrl", ignore = true)
   @Mapping(target = "dniFileUrl", ignore = true)

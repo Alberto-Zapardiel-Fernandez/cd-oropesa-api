@@ -50,14 +50,32 @@ public class CategoryController implements CategoriesApi {
     return ResponseEntity.ok(this.categoryMapper.toResponseList(categories));
   }
 
-  /**
-   * DELETE /categories/{id} : Eliminar una categoría
-   *
-   * @param id (required)
-   * @return Categoría eliminada con éxito (status code 204)
-   */
   @Override
-  public ResponseEntity<Void> categoriesIdDelete(UUID id) {
+  public ResponseEntity<CategoryResponse> getCategoryById(UUID id) {
+    return this.categoryService.findCategoryById(id)
+        .map(category -> ResponseEntity.ok(this.categoryMapper.toResponse(category)))
+        .orElse(ResponseEntity.notFound().build());
+  }
+
+  @Override
+  public ResponseEntity<CategoryResponse> updateCategory(
+      UUID id, CategoryRequest categoryRequest) {
+    return this.categoryService.findCategoryById(id)
+        .map(existingCategory -> {
+          Category updatedCategory = this.categoryMapper.toEntity(categoryRequest);
+          updatedCategory.setId(existingCategory.getId());
+          updatedCategory.setCreatedAt(existingCategory.getCreatedAt());
+          Category saved = this.categoryService.saveCategory(updatedCategory);
+          return ResponseEntity.ok(this.categoryMapper.toResponse(saved));
+        })
+        .orElse(ResponseEntity.notFound().build());
+  }
+
+  @Override
+  public ResponseEntity<Void> deleteCategory(UUID id) {
+    if (this.categoryService.findCategoryById(id).isEmpty()) {
+      return ResponseEntity.notFound().build();
+    }
     this.categoryService.deleteCategory(id);
     return ResponseEntity.noContent().build();
   }

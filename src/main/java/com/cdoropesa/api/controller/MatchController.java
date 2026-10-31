@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Controlador REST para la gestión del calendario de partidos y sus resultados.
@@ -87,5 +88,42 @@ public class MatchController implements MatchesApi {
     Match match = this.matchMapper.toEntity(matchRequest, team, opponent, venue);
     Match saved = this.matchService.saveMatch(match);
     return ResponseEntity.status(HttpStatus.CREATED).body(this.matchMapper.toResponse(saved));
+  }
+
+  @Override
+  public ResponseEntity<MatchResponse> getMatchById(UUID id) {
+    return this.matchService.findMatchById(id)
+        .map(match -> ResponseEntity.ok(this.matchMapper.toResponse(match)))
+        .orElse(ResponseEntity.notFound().build());
+  }
+
+  @Override
+  public ResponseEntity<MatchResponse> updateMatch(UUID id, MatchRequest matchRequest) {
+    return this.matchService.findMatchById(id)
+        .map(existingMatch -> {
+          Team team = this.teamService.findTeamById(matchRequest.getTeamId()).orElse(null);
+          Opponent opponent = this.opponentService
+              .findOpponentById(matchRequest.getOpponentId()).orElse(null);
+          Venue venue = this.venueService.findVenueById(matchRequest.getVenueId()).orElse(null);
+          if (team == null || opponent == null || venue == null) {
+            return ResponseEntity.badRequest().<MatchResponse>build();
+          }
+
+          Match updatedMatch = this.matchMapper.toEntity(matchRequest, team, opponent, venue);
+          updatedMatch.setId(existingMatch.getId());
+          updatedMatch.setCreatedAt(existingMatch.getCreatedAt());
+          Match saved = this.matchService.saveMatch(updatedMatch);
+          return ResponseEntity.ok(this.matchMapper.toResponse(saved));
+        })
+        .orElse(ResponseEntity.notFound().build());
+  }
+
+  @Override
+  public ResponseEntity<Void> deleteMatch(UUID id) {
+    if (this.matchService.findMatchById(id).isEmpty()) {
+      return ResponseEntity.notFound().build();
+    }
+    this.matchService.deleteMatch(id);
+    return ResponseEntity.noContent().build();
   }
 }

@@ -77,6 +77,27 @@ public class SeasonController implements SeasonsApi {
   }
 
   /**
+   * PUT /seasons/{id} : Actualizar una temporada
+   *
+   * @param id            (required)
+   * @param seasonRequest (required)
+   * @return Temporada actualizada (status code 200)
+   * or Temporada no encontrada (status code 404)
+   */
+  @Override
+  public ResponseEntity<SeasonResponse> updateSeason(UUID id, SeasonRequest seasonRequest) {
+    return this.seasonService.findSeasonById(id)
+        .map(existingSeason -> {
+          Season updatedSeason = this.seasonMapper.toEntity(seasonRequest);
+          updatedSeason.setId(existingSeason.getId());
+          updatedSeason.setCreatedAt(existingSeason.getCreatedAt());
+          Season saved = this.seasonService.saveSeason(updatedSeason);
+          return ResponseEntity.ok(this.seasonMapper.toResponse(saved));
+        })
+        .orElse(ResponseEntity.notFound().build());
+  }
+
+  /**
    * Elimina una temporada del sistema por su identificador UUID.
    *
    * @param id Identificador único de la temporada a eliminar.

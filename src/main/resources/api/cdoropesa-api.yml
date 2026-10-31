@@ -20,6 +20,8 @@ tags:
     description: Maestro de Entrenadores y técnicos
   - name: Venues
     description: Instalaciones deportivas y campos
+  - name: Opponents
+    description: Clubes y equipos rivales
   - name: Matches
     description: Calendario y resultados de partidos
   - name: Standings
@@ -82,6 +84,32 @@ paths:
                 $ref: '#/components/schemas/SeasonResponse'
         '404':
           description: Temporada no encontrada
+    put:
+      tags: [Seasons]
+      summary: Actualizar una temporada
+      operationId: updateSeason
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SeasonRequest'
+      responses:
+        '200':
+          description: Temporada actualizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SeasonResponse'
+        '404':
+          description: Temporada no encontrada
     delete:
       tags: [Seasons]
       summary: Eliminar una temporada
@@ -132,8 +160,56 @@ paths:
               schema:
                 $ref: '#/components/schemas/CategoryResponse'
   /categories/{id}:
+    get:
+      tags: [Categories]
+      summary: Obtener una categoría por ID
+      operationId: getCategoryById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Categoría encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryResponse'
+        '404':
+          description: Categoría no encontrada
+    put:
+      tags: [Categories]
+      summary: Actualizar una categoría
+      operationId: updateCategory
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryRequest'
+      responses:
+        '200':
+          description: Categoría actualizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryResponse'
+        '404':
+          description: Categoría no encontrada
     delete:
+      tags: [Categories]
       summary: Eliminar una categoría
+      operationId: deleteCategory
       parameters:
         - name: id
           in: path
@@ -144,6 +220,8 @@ paths:
       responses:
         '204':
           description: Categoría eliminada con éxito
+        '404':
+          description: Categoría no encontrada
 
   # ==========================================
   # TEAMS
@@ -179,9 +257,61 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TeamResponse'
+        '400':
+          description: La categoría o temporada indicada no existe
   /teams/{id}:
+    get:
+      tags: [Teams]
+      summary: Obtener un equipo por ID
+      operationId: getTeamById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Equipo encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamResponse'
+        '404':
+          description: Equipo no encontrado
+    put:
+      tags: [Teams]
+      summary: Actualizar un equipo
+      operationId: updateTeam
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TeamRequest'
+      responses:
+        '200':
+          description: Equipo actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamResponse'
+        '404':
+          description: Equipo no encontrado
+        '400':
+          description: La categoría o temporada indicada no existe
     delete:
+      tags: [Teams]
       summary: Eliminar un equipo
+      operationId: deleteTeam
       parameters:
         - name: id
           in: path
@@ -192,6 +322,8 @@ paths:
       responses:
         '204':
           description: Equipo eliminado con éxito
+        '404':
+          description: Equipo no encontrado
 
   # ==========================================
   # PLAYERS
@@ -322,6 +454,73 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CoachResponse'
+        '400':
+          description: El perfil de usuario indicado no existe
+  /coaches/{id}:
+    get:
+      tags: [Coaches]
+      summary: Obtener un entrenador por ID
+      operationId: getCoachById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Entrenador encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CoachResponse'
+        '404':
+          description: Entrenador no encontrado
+    put:
+      tags: [Coaches]
+      summary: Actualizar un entrenador
+      operationId: updateCoach
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CoachRequest'
+      responses:
+        '200':
+          description: Entrenador actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CoachResponse'
+        '404':
+          description: Entrenador no encontrado
+        '400':
+          description: El perfil de usuario indicado no existe
+    delete:
+      tags: [Coaches]
+      summary: Eliminar un entrenador
+      operationId: deleteCoach
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Entrenador eliminado
+        '404':
+          description: Entrenador no encontrado
 
   # ==========================================
   # VENUES
@@ -357,6 +556,69 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/VenueResponse'
+  /venues/{id}:
+    get:
+      tags: [Venues]
+      summary: Obtener una instalación por ID
+      operationId: getVenueById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Instalación encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VenueResponse'
+        '404':
+          description: Instalación no encontrada
+    put:
+      tags: [Venues]
+      summary: Actualizar una instalación
+      operationId: updateVenue
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VenueRequest'
+      responses:
+        '200':
+          description: Instalación actualizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VenueResponse'
+        '404':
+          description: Instalación no encontrada
+    delete:
+      tags: [Venues]
+      summary: Eliminar una instalación
+      operationId: deleteVenue
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Instalación eliminada
+        '404':
+          description: Instalación no encontrada
 
   # ==========================================
   # MATCHES
@@ -392,6 +654,179 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MatchResponse'
+        '400':
+          description: El equipo, rival o instalación indicada no existe
+  /matches/{id}:
+    get:
+      tags: [Matches]
+      summary: Obtener un partido por ID
+      operationId: getMatchById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Partido encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatchResponse'
+        '404':
+          description: Partido no encontrado
+    put:
+      tags: [Matches]
+      summary: Actualizar un partido
+      operationId: updateMatch
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MatchRequest'
+      responses:
+        '200':
+          description: Partido actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatchResponse'
+        '404':
+          description: Partido no encontrado
+        '400':
+          description: El equipo, rival o instalación indicada no existe
+    delete:
+      tags: [Matches]
+      summary: Eliminar un partido
+      operationId: deleteMatch
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Partido eliminado
+        '404':
+          description: Partido no encontrado
+
+  # ==========================================
+  # OPPONENTS
+  # ==========================================
+  /opponents:
+    get:
+      tags: [Opponents]
+      summary: Buscar o listar clubes rivales
+      operationId: getAllOpponents
+      parameters:
+        - name: search
+          in: query
+          required: false
+          description: Texto opcional para filtrar rivales por nombre.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Rivales encontrados
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OpponentResponse'
+    post:
+      tags: [Opponents]
+      summary: Registrar un club rival
+      operationId: createOpponent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpponentRequest'
+      responses:
+        '201':
+          description: Rival registrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpponentResponse'
+
+  /opponents/{id}:
+    get:
+      tags: [Opponents]
+      summary: Obtener un club rival por ID
+      operationId: getOpponentById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Rival encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpponentResponse'
+        '404':
+          description: Rival no encontrado
+    put:
+      tags: [Opponents]
+      summary: Actualizar un club rival
+      operationId: updateOpponent
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpponentRequest'
+      responses:
+        '200':
+          description: Rival actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpponentResponse'
+        '404':
+          description: Rival no encontrado
+    delete:
+      tags: [Opponents]
+      summary: Eliminar un club rival
+      operationId: deleteOpponent
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Rival eliminado
+        '404':
+          description: Rival no encontrado
 
   # ==========================================
   # STANDINGS
@@ -615,6 +1050,9 @@ components:
         id:
           type: string
           format: uuid
+        userId:
+          type: string
+          format: uuid
         firstName:
           type: string
         lastName:
@@ -674,6 +1112,46 @@ components:
           type: boolean
         surfaceType:
           type: string
+        googleMapsUrl:
+          type: string
+        imageUrl:
+          type: string
+        notes:
+          type: string
+
+    OpponentRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          maxLength: 150
+          example: "C.F. Talavera Benjamín A"
+        contactPerson:
+          type: string
+        contactPhone:
+          type: string
+        contactEmail:
+          type: string
+        notes:
+          type: string
+
+    OpponentResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        contactPerson:
+          type: string
+        contactPhone:
+          type: string
+        contactEmail:
+          type: string
+        notes:
+          type: string
 
     # --- MATCHES ---
     MatchRequest:
@@ -709,6 +1187,15 @@ components:
       type: object
       properties:
         id:
+          type: string
+          format: uuid
+        teamId:
+          type: string
+          format: uuid
+        opponentId:
+          type: string
+          format: uuid
+        venueId:
           type: string
           format: uuid
         matchday:

@@ -1,6 +1,7 @@
 package com.cdoropesa.api.service;
 
 import com.cdoropesa.api.model.TeamStaff;
+import com.cdoropesa.api.model.enums.StaffRole;
 import com.cdoropesa.api.repository.TeamStaffRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,6 +50,21 @@ public class TeamStaffService {
   @Transactional(readOnly = true)
   public Optional<TeamStaff> findTeamStaffById(UUID id) {
     return this.teamStaffRepository.findById(id);
+  }
+
+  @Transactional(readOnly = true)
+  public List<TeamStaff> findTeamStaffByTeamId(UUID teamId) {
+    return this.teamStaffRepository.findAllByTeam_Id(teamId);
+  }
+
+  @Transactional(readOnly = true)
+  public boolean existsAssignment(UUID teamId, UUID coachId, StaffRole roleInTeam) {
+    return this.teamStaffRepository.existsByTeam_IdAndCoach_IdAndRoleInTeam(teamId, coachId, roleInTeam);
+  }
+
+  @Transactional(readOnly = true)
+  public boolean hasAssignments(UUID coachId) {
+    return this.teamStaffRepository.existsByCoach_Id(coachId);
   }
 
   /**

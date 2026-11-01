@@ -8,6 +8,12 @@ package com.cdoropesa.api.model.enums;
  */
 public enum StaffRole {
   HEAD_COACH,
+  SECOND_COACH,
+  THIRD_COACH,
   ASSISTANT_COACH,
-  DELEGATE
+  DELEGATE,
+  GOALKEEPER_COACH,
+  FITNESS_COACH,
+  PHYSIOTHERAPIST,
+  KIT_MANAGER
 }

@@ -11,12 +11,16 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.util.ArrayList;
+import java.util.List;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.UuidGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 /**
  * Entidad JPA que representa la tabla 'coaches' en la base de datos PostgreSQL.
@@ -102,11 +106,9 @@ public class Coach {
   @Column(name = "photo_url", columnDefinition = "TEXT")
   private String photoUrl;
 
-  /**
-   * URL del documento DNI escaneado.
-   */
-  @Column(name = "dni_file_url", columnDefinition = "TEXT")
-  private String dniFileUrl;
+  @JdbcTypeCode(SqlTypes.JSON)
+  @Column(name = "documentation", columnDefinition = "jsonb", nullable = false)
+  private List<PlayerDocument> documentation = new ArrayList<>();
 
   /**
    * Estado operativo del entrenador en el club (ACTIVE, INACTIVE).

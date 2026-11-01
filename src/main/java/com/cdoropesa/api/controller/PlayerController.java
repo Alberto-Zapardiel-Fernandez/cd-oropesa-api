@@ -1,18 +1,21 @@
 package com.cdoropesa.api.controller;
 
+import com.cdoropesa.api.dto.PlayerFileAccessResponse;
 import com.cdoropesa.api.dto.PlayerRequest;
 import com.cdoropesa.api.dto.PlayerResponse;
 import com.cdoropesa.api.generated.PlayersApi;
 import com.cdoropesa.api.mapper.PlayerMapper;
 import com.cdoropesa.api.model.Player;
+import com.cdoropesa.api.service.PlayerFileStorageService;
 import com.cdoropesa.api.service.PlayerService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.web.multipart.MultipartFile;
+import java.net.URI;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Controlador REST para la gestión del maestro de Jugadores y sus fichas.
@@ -27,6 +30,7 @@ public class PlayerController implements PlayersApi {
 
   private final PlayerService playerService;
   private final PlayerMapper playerMapper;
+  private final PlayerFileStorageService playerFileStorageService;
 
   /**
    * Inyección de dependencias mediante constructor.
@@ -34,9 +38,14 @@ public class PlayerController implements PlayersApi {
    * @param playerService Servicio de lógica de negocio para jugadores.
    * @param playerMapper Mapeador MapStruct entre entidades y DTOs.
    */
-  public PlayerController(PlayerService playerService, PlayerMapper playerMapper) {
+  public PlayerController(
+      PlayerService playerService,
+      PlayerMapper playerMapper,
+      PlayerFileStorageService playerFileStorageService
+  ) {
     this.playerService = playerService;
     this.playerMapper = playerMapper;
+    this.playerFileStorageService = playerFileStorageService;
   }
 
   /**
@@ -90,7 +99,8 @@ public class PlayerController implements PlayersApi {
           Player updatedPlayer = this.playerMapper.toEntity(playerRequest);
           updatedPlayer.setId(existingPlayer.getId());
           updatedPlayer.setCreatedAt(existingPlayer.getCreatedAt());
-          updatedPlayer.setDniFileUrl(existingPlayer.getDniFileUrl());
+          updatedPlayer.setPhotoUrl(existingPlayer.getPhotoUrl());
+          updatedPlayer.setDocumentation(existingPlayer.getDocumentation());
           Player saved = this.playerService.savePlayer(updatedPlayer);
           return ResponseEntity.ok(this.playerMapper.toResponse(saved));
         })
@@ -110,5 +120,51 @@ public class PlayerController implements PlayersApi {
       return ResponseEntity.noContent().build();
     }
     return ResponseEntity.notFound().build();
+  }
+
+  @Override
+  public ResponseEntity<PlayerResponse> uploadPlayerPhoto(UUID id, MultipartFile file) {
+    Player saved = this.playerFileStorageService.store(
+        id,
+        PlayerFileStorageService.AssetType.PHOTO,
+        file
+    );
+    return ResponseEntity.ok(this.playerMapper.toResponse(saved));
+  }
+
+  @Override
+  public ResponseEntity<PlayerFileAccessResponse> getPlayerPhotoAccess(UUID id) {
+    String url = this.playerFileStorageService.createSignedUrl(
+        id,
+        PlayerFileStorageService.AssetType.PHOTO
+    );
+    return ResponseEntity.ok(new PlayerFileAccessResponse(URI.create(url), 300));
+  }
+
+  @Override
+  public ResponseEntity<PlayerResponse> deletePlayerPhoto(UUID id) {
+    Player updated = this.playerFileStorageService.delete(
+        id,
+        PlayerFileStorageService.AssetType.PHOTO
+    );
+    return ResponseEntity.ok(this.playerMapper.toResponse(updated));
+  }
+
+  @Override
+  public ResponseEntity<PlayerResponse> uploadPlayerDocument(UUID id, MultipartFile file, String kind) {
+    Player updated = this.playerFileStorageService.storeDocument(id, kind, file);
+    return ResponseEntity.ok(this.playerMapper.toResponse(updated));
+  }
+
+  @Override
+  public ResponseEntity<PlayerFileAccessResponse> getPlayerDocumentAccess(UUID id, UUID documentId) {
+    String url = this.playerFileStorageService.createSignedDocumentUrl(id, documentId.toString());
+    return ResponseEntity.ok(new PlayerFileAccessResponse(URI.create(url), 300));
+  }
+
+  @Override
+  public ResponseEntity<PlayerResponse> deletePlayerDocument(UUID id, UUID documentId) {
+    Player updated = this.playerFileStorageService.deleteDocument(id, documentId.toString());
+    return ResponseEntity.ok(this.playerMapper.toResponse(updated));
   }
 }

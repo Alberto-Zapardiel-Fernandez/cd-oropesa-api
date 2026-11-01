@@ -1,5 +1,6 @@
 package com.cdoropesa.api.controller;
 
+import com.cdoropesa.api.dto.UserResponse;
 import com.cdoropesa.api.model.UserEntity;
 import com.cdoropesa.api.service.UserService;
 import org.springframework.http.ResponseEntity;
@@ -27,12 +28,30 @@ public class UserController {
   }
 
   @GetMapping
-  public ResponseEntity<List<UserEntity>> getAllUsers() {
-    return ResponseEntity.ok(this.userService.getAllUsers());
+  public ResponseEntity<List<UserResponse>> getAllUsers() {
+    List<UserResponse> users = this.userService.getAllUsers().stream()
+        .map(UserController::toResponse)
+        .toList();
+    return ResponseEntity.ok(users);
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<UserEntity> getUserById(@PathVariable Long id) {
-    return ResponseEntity.ok(this.userService.getUserById(id));
+  public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
+    return ResponseEntity.ok(toResponse(this.userService.getUserById(id)));
+  }
+
+  private static UserResponse toResponse(UserEntity user) {
+    return new UserResponse(
+        user.getId(),
+        user.getEmail(),
+        user.getFirstName(),
+        user.getLastName(),
+        user.getAddress(),
+        user.getCity(),
+        user.getProvince(),
+        user.getCountry(),
+        user.getPhone(),
+        user.getRole()
+    );
   }
 }

@@ -1,5 +1,17 @@
 spring:
   application:
     name: cd-oropesa-api
-  profiles:
-    active: local
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 6MB
+
+application:
+  security:
+    jwt:
+      secret-key: ${JWT_SECRET_KEY}
+      expiration: ${JWT_EXPIRATION:900000}
+  supabase:
+    url: ${SUPABASE_URL:}
+    api-key: ${SUPABASE_SECRET_KEY:${SUPABASE_SERVICE_ROLE_KEY:}}
+    bucket: ${SUPABASE_STORAGE_BUCKET:player-private-files}

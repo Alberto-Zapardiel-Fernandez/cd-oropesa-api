@@ -16,6 +16,9 @@ public class TeamPlayerMapper {
     response.setLastName(teamPlayer.getPlayer().getLastName());
     response.setDorsal(teamPlayer.getDorsal());
     response.setStatus(TeamPlayerResponse.StatusEnum.valueOf(teamPlayer.getStatus().name()));
+    response.setPositions(teamPlayer.getPositions().stream()
+        .map(position -> TeamPlayerResponse.PositionsEnum.valueOf(position))
+        .toList());
     return response;
   }
 

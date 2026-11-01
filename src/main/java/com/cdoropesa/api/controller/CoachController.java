@@ -2,19 +2,23 @@ package com.cdoropesa.api.controller;
 
 import com.cdoropesa.api.dto.CoachRequest;
 import com.cdoropesa.api.dto.CoachResponse;
+import com.cdoropesa.api.dto.PlayerFileAccessResponse;
 import com.cdoropesa.api.generated.CoachesApi;
 import com.cdoropesa.api.mapper.CoachMapper;
 import com.cdoropesa.api.model.Coach;
 import com.cdoropesa.api.model.Profile;
 import com.cdoropesa.api.model.enums.CoachStatus;
 import com.cdoropesa.api.service.CoachService;
+import com.cdoropesa.api.service.CoachFileStorageService;
 import com.cdoropesa.api.service.ProfileService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.net.URI;
 import java.util.UUID;
 
 /**
@@ -31,6 +35,7 @@ public class CoachController implements CoachesApi {
   private final CoachService coachService;
   private final ProfileService profileService;
   private final CoachMapper coachMapper;
+  private final CoachFileStorageService coachFileStorageService;
 
   /**
    * Inyección de dependencias mediante constructor.
@@ -39,10 +44,15 @@ public class CoachController implements CoachesApi {
    * @param coachMapper Mapeador MapStruct entre entidades y DTOs.
    */
   public CoachController(
-      CoachService coachService, ProfileService profileService, CoachMapper coachMapper) {
+      CoachService coachService,
+      ProfileService profileService,
+      CoachMapper coachMapper,
+      CoachFileStorageService coachFileStorageService
+  ) {
     this.coachService = coachService;
     this.profileService = profileService;
     this.coachMapper = coachMapper;
+    this.coachFileStorageService = coachFileStorageService;
   }
 
   /**
@@ -97,7 +107,7 @@ public class CoachController implements CoachesApi {
           updatedCoach.setId(existingCoach.getId());
           updatedCoach.setCreatedAt(existingCoach.getCreatedAt());
           updatedCoach.setPhotoUrl(existingCoach.getPhotoUrl());
-          updatedCoach.setDniFileUrl(existingCoach.getDniFileUrl());
+          updatedCoach.setDocumentation(existingCoach.getDocumentation());
           updatedCoach.setUser(profile);
           if (updatedCoach.getStatus() == null) {
             updatedCoach.setStatus(CoachStatus.ACTIVE);
@@ -113,8 +123,44 @@ public class CoachController implements CoachesApi {
     if (this.coachService.findCoachById(id).isEmpty()) {
       return ResponseEntity.notFound().build();
     }
-    this.coachService.deleteCoach(id);
+    this.coachFileStorageService.deleteCoach(id);
     return ResponseEntity.noContent().build();
+  }
+
+  @Override
+  public ResponseEntity<CoachResponse> uploadCoachPhoto(UUID id, MultipartFile file) {
+    return ResponseEntity.ok(this.coachMapper.toResponse(this.coachFileStorageService.uploadPhoto(id, file)));
+  }
+
+  @Override
+  public ResponseEntity<CoachResponse> deleteCoachPhoto(UUID id) {
+    return ResponseEntity.ok(this.coachMapper.toResponse(this.coachFileStorageService.deletePhoto(id)));
+  }
+
+  @Override
+  public ResponseEntity<PlayerFileAccessResponse> getCoachPhotoAccess(UUID id) {
+    String url = this.coachFileStorageService.createSignedPhotoUrl(id);
+    return ResponseEntity.ok(new PlayerFileAccessResponse(URI.create(url), 300));
+  }
+
+  @Override
+  public ResponseEntity<CoachResponse> uploadCoachDocument(UUID id, MultipartFile file, String kind) {
+    return ResponseEntity.ok(
+        this.coachMapper.toResponse(this.coachFileStorageService.uploadDocument(id, kind, file))
+    );
+  }
+
+  @Override
+  public ResponseEntity<PlayerFileAccessResponse> getCoachDocumentAccess(UUID id, UUID documentId) {
+    String url = this.coachFileStorageService.createSignedDocumentUrl(id, documentId);
+    return ResponseEntity.ok(new PlayerFileAccessResponse(URI.create(url), 300));
+  }
+
+  @Override
+  public ResponseEntity<CoachResponse> deleteCoachDocument(UUID id, UUID documentId) {
+    return ResponseEntity.ok(
+        this.coachMapper.toResponse(this.coachFileStorageService.deleteDocument(id, documentId))
+    );
   }
 
   private Profile findProfile(UUID id) {

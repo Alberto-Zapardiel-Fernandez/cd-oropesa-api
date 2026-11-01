@@ -46,6 +46,6 @@ public interface CoachMapper {
   @Mapping(target = "createdAt", ignore = true)
   @Mapping(target = "user", ignore = true)
   @Mapping(target = "photoUrl", ignore = true)
-  @Mapping(target = "dniFileUrl", ignore = true)
+  @Mapping(target = "documentation", ignore = true)
   Coach toEntity(CoachRequest request);
 }

@@ -7,11 +7,15 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.UuidGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 /**
  * Entidad JPA que representa la tabla 'players' en la base de datos PostgreSQL.
@@ -77,11 +81,9 @@ public class Player {
   @Column(name = "photo_url", columnDefinition = "TEXT")
   private String photoUrl;
 
-  /**
-   * URL o ruta del documento DNI escaneado.
-   */
-  @Column(name = "dni_file_url", columnDefinition = "TEXT")
-  private String dniFileUrl;
+  @JdbcTypeCode(SqlTypes.JSON)
+  @Column(name = "documentation", columnDefinition = "jsonb", nullable = false)
+  private List<PlayerDocument> documentation = new ArrayList<>();
 
   /**
    * Consentimiento firmado para la Ley Orgánica de Protección de Datos (RGPD).

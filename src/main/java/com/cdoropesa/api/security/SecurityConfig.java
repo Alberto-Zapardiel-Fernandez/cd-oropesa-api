@@ -59,10 +59,17 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
             .requestMatchers("/api/v1/auth/**").permitAll()
             .requestMatchers(HttpMethod.GET, "/api/v1/players", "/api/v1/players/**").hasRole("ADMIN")
+            .requestMatchers(HttpMethod.GET, "/api/v1/coaches", "/api/v1/coaches/**").hasRole("ADMIN")
+            .requestMatchers(HttpMethod.GET, "/api/v1/users", "/api/v1/users/**").hasRole("ADMIN")
             .requestMatchers(
                 HttpMethod.GET,
                 "/api/v1/teams/*/players",
                 "/api/v1/teams/*/players/**"
+            ).hasRole("ADMIN")
+            .requestMatchers(
+                HttpMethod.GET,
+                "/api/v1/teams/*/staff",
+                "/api/v1/teams/*/staff/**"
             ).hasRole("ADMIN")
             .requestMatchers(HttpMethod.GET, "/api/v1/**").permitAll()
             .requestMatchers(HttpMethod.POST, "/api/v1/**").hasRole("ADMIN")

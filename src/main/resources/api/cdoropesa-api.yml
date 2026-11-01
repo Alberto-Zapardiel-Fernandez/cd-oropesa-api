@@ -457,6 +457,82 @@ paths:
         '404':
           description: Inscripción no encontrada en ese equipo
 
+  /teams/{teamId}/staff:
+    get:
+      tags: [TeamStaff]
+      summary: Listar cargos del cuerpo técnico asignados al equipo
+      operationId: getTeamStaff
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Asignaciones encontradas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TeamStaffResponse'
+        '404':
+          description: Equipo no encontrado
+    post:
+      tags: [TeamStaff]
+      summary: Asignar un cargo del cuerpo técnico al equipo
+      operationId: addStaffToTeam
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TeamStaffCreateRequest'
+      responses:
+        '201':
+          description: Cargo asignado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamStaffResponse'
+        '404':
+          description: Equipo o persona no encontrados
+        '409':
+          description: La misma persona ya tiene ese cargo en el equipo
+
+  /teams/{teamId}/staff/{teamStaffId}:
+    delete:
+      tags: [TeamStaff]
+      summary: Quitar un cargo del equipo
+      operationId: removeStaffFromTeam
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: teamStaffId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Cargo quitado del equipo; la ficha de la persona se conserva
+        '404':
+          description: Asignación no encontrada en ese equipo
+
   # ==========================================
   # PLAYERS
   # ==========================================
@@ -551,6 +627,183 @@ paths:
       responses:
         '204':
           description: Eliminado con éxito
+
+  /players/{id}/photo:
+    post:
+      tags: [Players]
+      summary: Subir o reemplazar la fotografía del jugador
+      operationId: uploadPlayerPhoto
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Fotografía subida; se devuelve la ficha actualizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlayerResponse'
+        '400':
+          description: Formato o contenido no válido
+        '404':
+          description: Jugador no encontrado
+        '413':
+          description: Archivo superior al límite permitido
+        '503':
+          description: Almacenamiento no configurado
+    delete:
+      tags: [Players]
+      summary: Eliminar la fotografía privada de un jugador
+      operationId: deletePlayerPhoto
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Fotografía eliminada y ficha actualizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlayerResponse'
+        '404':
+          description: Jugador o fotografía no encontrada
+
+  /players/{id}/photo-access:
+    get:
+      tags: [Players]
+      summary: Obtener acceso temporal a la fotografía privada
+      operationId: getPlayerPhotoAccess
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Enlace privado temporal
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlayerFileAccessResponse'
+        '404':
+          description: Fotografía no encontrada
+
+  /players/{id}/documentation:
+    post:
+      tags: [Players]
+      summary: Subir documentación adicional o una cara del DNI
+      operationId: uploadPlayerDocument
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file, kind]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                kind:
+                  type: string
+                  enum: [DNI_FRONT, DNI_BACK, OTHER]
+      responses:
+        '200':
+          description: Archivo subido y ficha actualizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlayerResponse'
+        '400':
+          description: Tipo o archivo no válido
+        '404':
+          description: Jugador no encontrado
+        '413':
+          description: Archivo superior al límite permitido
+
+  /players/{id}/documentation/{documentId}/access:
+    get:
+      tags: [Players]
+      summary: Obtener un enlace temporal a documentación privada
+      operationId: getPlayerDocumentAccess
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Enlace privado temporal
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlayerFileAccessResponse'
+        '404':
+          description: Documento no encontrado
+
+  /players/{id}/documentation/{documentId}:
+    delete:
+      tags: [Players]
+      summary: Eliminar documentación privada
+      operationId: deletePlayerDocument
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Archivo eliminado y ficha actualizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlayerResponse'
+        '404':
+          description: Jugador o documento no encontrado
 
   # ==========================================
   # COACHES
@@ -653,7 +906,156 @@ paths:
           description: Entrenador eliminado
         '404':
           description: Entrenador no encontrado
-
+  /coaches/{id}/photo:
+    post:
+      tags: [Coaches]
+      summary: Subir o reemplazar la fotografía del miembro del cuerpo técnico
+      operationId: uploadCoachPhoto
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Fotografía subida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CoachResponse'
+    delete:
+      tags: [Coaches]
+      summary: Eliminar fotografía del miembro del cuerpo técnico
+      operationId: deleteCoachPhoto
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Fotografía eliminada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CoachResponse'
+  /coaches/{id}/photo-access:
+    get:
+      tags: [Coaches]
+      summary: Obtener enlace temporal a la fotografía del miembro del cuerpo técnico
+      operationId: getCoachPhotoAccess
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Enlace privado temporal
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlayerFileAccessResponse'
+  /coaches/{id}/documentation:
+    post:
+      tags: [Coaches]
+      summary: Subir documentación o una cara del DNI
+      operationId: uploadCoachDocument
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file, kind]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                kind:
+                  type: string
+                  enum: [DNI_FRONT, DNI_BACK, OTHER]
+      responses:
+        '200':
+          description: Archivo subido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CoachResponse'
+  /coaches/{id}/documentation/{documentId}/access:
+    get:
+      tags: [Coaches]
+      summary: Obtener enlace temporal a documentación privada
+      operationId: getCoachDocumentAccess
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Enlace privado temporal
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlayerFileAccessResponse'
+  /coaches/{id}/documentation/{documentId}:
+    delete:
+      tags: [Coaches]
+      summary: Eliminar documento privado del miembro del cuerpo técnico
+      operationId: deleteCoachDocument
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Documento eliminado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CoachResponse'
   # ==========================================
   # VENUES
   # ==========================================
@@ -1115,6 +1517,12 @@ components:
           type: string
           enum: [PENDING_DOCS, ACTIVE, INACTIVE, EXPIRED_LICENSE]
           default: PENDING_DOCS
+        positions:
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+            enum: [GOALKEEPER, DEFENDER, MIDFIELDER, FORWARD]
 
     TeamPlayerUpdateRequest:
       type: object
@@ -1129,6 +1537,12 @@ components:
         status:
           type: string
           enum: [PENDING_DOCS, ACTIVE, INACTIVE, EXPIRED_LICENSE]
+        positions:
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+            enum: [GOALKEEPER, DEFENDER, MIDFIELDER, FORWARD]
 
     TeamPlayerResponse:
       type: object
@@ -1148,6 +1562,40 @@ components:
         status:
           type: string
           enum: [PENDING_DOCS, ACTIVE, INACTIVE, EXPIRED_LICENSE]
+        positions:
+          type: array
+          items:
+            type: string
+            enum: [GOALKEEPER, DEFENDER, MIDFIELDER, FORWARD]
+
+    TeamStaffCreateRequest:
+      type: object
+      required: [coachId, roleInTeam]
+      properties:
+        coachId:
+          type: string
+          format: uuid
+        roleInTeam:
+          type: string
+          enum: [HEAD_COACH, SECOND_COACH, THIRD_COACH, ASSISTANT_COACH, DELEGATE, GOALKEEPER_COACH, FITNESS_COACH, PHYSIOTHERAPIST, KIT_MANAGER]
+
+    TeamStaffResponse:
+      type: object
+      required: [id, coachId, firstName, lastName, roleInTeam]
+      properties:
+        id:
+          type: string
+          format: uuid
+        coachId:
+          type: string
+          format: uuid
+        firstName:
+          type: string
+        lastName:
+          type: string
+        roleInTeam:
+          type: string
+          enum: [HEAD_COACH, SECOND_COACH, THIRD_COACH, ASSISTANT_COACH, DELEGATE, GOALKEEPER_COACH, FITNESS_COACH, PHYSIOTHERAPIST, KIT_MANAGER]
 
     # --- PLAYERS ---
     PlayerRequest:
@@ -1173,8 +1621,6 @@ components:
           type: string
           example: "Calle Mayor 12"
         photoUrl:
-          type: string
-        dniFileUrl:
           type: string
         gdprConsent:
           type: boolean
@@ -1207,6 +1653,12 @@ components:
           type: string
         photoUrl:
           type: string
+          description: Ruta interna del archivo privado de fotografía, si existe
+        documentation:
+          type: array
+          description: Metadatos de documentos privados; el contenido está en Storage
+          items:
+            $ref: '#/components/schemas/PlayerDocumentResponse'
         gdprConsent:
           type: boolean
         guardianName:
@@ -1214,6 +1666,32 @@ components:
         guardianPhone:
           type: string
         guardianEmail:
+          type: string
+
+    PlayerFileAccessResponse:
+      type: object
+      required: [url, expiresInSeconds]
+      properties:
+        url:
+          type: string
+          format: uri
+        expiresInSeconds:
+          type: integer
+          example: 300
+
+    PlayerDocumentResponse:
+      type: object
+      required: [id, fileName, kind, contentType]
+      properties:
+        id:
+          type: string
+          format: uuid
+        fileName:
+          type: string
+        kind:
+          type: string
+          enum: [DNI_FRONT, DNI_BACK, OTHER]
+        contentType:
           type: string
 
     # --- COACHES ---
@@ -1267,6 +1745,14 @@ components:
           type: string
         qualification:
           type: string
+        photoUrl:
+          type: string
+          description: Ruta interna de la fotografía privada
+        documentation:
+          type: array
+          description: Metadatos de documentos privados
+          items:
+            $ref: '#/components/schemas/PlayerDocumentResponse'
         status:
           type: string
 

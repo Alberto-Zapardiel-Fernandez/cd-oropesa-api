@@ -13,6 +13,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -65,6 +67,10 @@ public class TeamPlayer {
    */
   @Column(name = "dorsal")
   private Integer dorsal;
+
+  @JdbcTypeCode(SqlTypes.JSON)
+  @Column(name = "positions", columnDefinition = "jsonb", nullable = false)
+  private List<String> positions = new ArrayList<>();
 
   /**
    * Estado administrativo de la ficha del jugador en el equipo (PENDING_DOCS, ACTIVE, etc.).

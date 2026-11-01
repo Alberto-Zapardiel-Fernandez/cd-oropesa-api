@@ -1,6 +1,8 @@
 package com.cdoropesa.api.repository;
 
 import com.cdoropesa.api.model.TeamStaff;
+import com.cdoropesa.api.model.enums.StaffRole;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -14,5 +16,9 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface TeamStaffRepository extends JpaRepository<TeamStaff, UUID> {
-  // Se añadirán consultas personalizadas según se requieran.
+  List<TeamStaff> findAllByTeam_Id(UUID teamId);
+
+  boolean existsByTeam_IdAndCoach_IdAndRoleInTeam(UUID teamId, UUID coachId, StaffRole roleInTeam);
+
+  boolean existsByCoach_Id(UUID coachId);
 }

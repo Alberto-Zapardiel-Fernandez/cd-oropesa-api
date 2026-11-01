@@ -5,20 +5,28 @@ import com.cdoropesa.api.dto.TeamResponse;
 import com.cdoropesa.api.dto.TeamPlayerCreateRequest;
 import com.cdoropesa.api.dto.TeamPlayerResponse;
 import com.cdoropesa.api.dto.TeamPlayerUpdateRequest;
+import com.cdoropesa.api.dto.TeamStaffCreateRequest;
+import com.cdoropesa.api.dto.TeamStaffResponse;
 import com.cdoropesa.api.generated.TeamsApi;
 import com.cdoropesa.api.mapper.TeamPlayerMapper;
 import com.cdoropesa.api.mapper.TeamMapper;
+import com.cdoropesa.api.mapper.TeamStaffMapper;
 import com.cdoropesa.api.model.Category;
 import com.cdoropesa.api.model.Player;
 import com.cdoropesa.api.model.Season;
 import com.cdoropesa.api.model.Team;
 import com.cdoropesa.api.model.TeamPlayer;
+import com.cdoropesa.api.model.TeamStaff;
+import com.cdoropesa.api.model.Coach;
+import com.cdoropesa.api.model.enums.StaffRole;
 import com.cdoropesa.api.model.enums.PlayerStatus;
 import com.cdoropesa.api.service.CategoryService;
 import com.cdoropesa.api.service.PlayerService;
 import com.cdoropesa.api.service.SeasonService;
 import com.cdoropesa.api.service.TeamService;
 import com.cdoropesa.api.service.TeamPlayerService;
+import com.cdoropesa.api.service.TeamStaffService;
+import com.cdoropesa.api.service.CoachService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,6 +52,9 @@ public class TeamController implements TeamsApi {
   private final SeasonService seasonService;
   private final TeamMapper teamMapper;
   private final TeamPlayerMapper teamPlayerMapper;
+  private final TeamStaffService teamStaffService;
+  private final CoachService coachService;
+  private final TeamStaffMapper teamStaffMapper;
 
   /**
    * Inyección de dependencias mediante constructor.
@@ -59,7 +70,10 @@ public class TeamController implements TeamsApi {
                         CategoryService categoryService,
                         SeasonService seasonService,
                         TeamMapper teamMapper,
-                        TeamPlayerMapper teamPlayerMapper) {
+                        TeamPlayerMapper teamPlayerMapper,
+                        TeamStaffService teamStaffService,
+                        CoachService coachService,
+                        TeamStaffMapper teamStaffMapper) {
     this.teamService = teamService;
     this.teamPlayerService = teamPlayerService;
     this.playerService = playerService;
@@ -67,6 +81,9 @@ public class TeamController implements TeamsApi {
     this.seasonService = seasonService;
     this.teamMapper = teamMapper;
     this.teamPlayerMapper = teamPlayerMapper;
+    this.teamStaffService = teamStaffService;
+    this.coachService = coachService;
+    this.teamStaffMapper = teamStaffMapper;
   }
 
   /**
@@ -166,6 +183,9 @@ public class TeamController implements TeamsApi {
     teamPlayer.setStatus(teamPlayerCreateRequest.getStatus() == null
         ? PlayerStatus.PENDING_DOCS
         : PlayerStatus.valueOf(teamPlayerCreateRequest.getStatus().name()));
+    teamPlayer.setPositions(teamPlayerCreateRequest.getPositions() == null
+        ? List.of()
+        : teamPlayerCreateRequest.getPositions().stream().map(Enum::name).toList());
     TeamPlayer saved = this.teamPlayerService.saveTeamPlayer(teamPlayer);
     return ResponseEntity.status(HttpStatus.CREATED).body(this.teamPlayerMapper.toResponse(saved));
   }
@@ -187,6 +207,9 @@ public class TeamController implements TeamsApi {
     if (requestedStatus != null) {
       teamPlayer.setStatus(PlayerStatus.valueOf(requestedStatus.name()));
     }
+    if (request.getPositions() != null) {
+      teamPlayer.setPositions(request.getPositions().stream().map(Enum::name).toList());
+    }
     TeamPlayer saved = this.teamPlayerService.saveTeamPlayer(teamPlayer);
     return ResponseEntity.ok(this.teamPlayerMapper.toResponse(saved));
   }
@@ -198,6 +221,48 @@ public class TeamController implements TeamsApi {
       return ResponseEntity.notFound().build();
     }
     this.teamPlayerService.deleteTeamPlayer(teamPlayerId);
+    return ResponseEntity.noContent().build();
+  }
+
+  @Override
+  public ResponseEntity<List<TeamStaffResponse>> getTeamStaff(UUID teamId) {
+    if (this.teamService.findTeamById(teamId).isEmpty()) {
+      return ResponseEntity.notFound().build();
+    }
+    return ResponseEntity.ok(this.teamStaffMapper.toResponseList(
+        this.teamStaffService.findTeamStaffByTeamId(teamId)
+    ));
+  }
+
+  @Override
+  public ResponseEntity<TeamStaffResponse> addStaffToTeam(
+      UUID teamId,
+      TeamStaffCreateRequest request
+  ) {
+    Team team = this.teamService.findTeamById(teamId).orElse(null);
+    Coach coach = this.coachService.findCoachById(request.getCoachId()).orElse(null);
+    if (team == null || coach == null) {
+      return ResponseEntity.notFound().build();
+    }
+    StaffRole role = StaffRole.valueOf(request.getRoleInTeam().name());
+    if (this.teamStaffService.existsAssignment(teamId, coach.getId(), role)) {
+      return ResponseEntity.status(HttpStatus.CONFLICT).build();
+    }
+    TeamStaff assignment = new TeamStaff();
+    assignment.setTeam(team);
+    assignment.setCoach(coach);
+    assignment.setRoleInTeam(role);
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(this.teamStaffMapper.toResponse(this.teamStaffService.saveTeamStaff(assignment)));
+  }
+
+  @Override
+  public ResponseEntity<Void> removeStaffFromTeam(UUID teamId, UUID teamStaffId) {
+    TeamStaff assignment = this.teamStaffService.findTeamStaffById(teamStaffId).orElse(null);
+    if (assignment == null || !assignment.getTeam().getId().equals(teamId)) {
+      return ResponseEntity.notFound().build();
+    }
+    this.teamStaffService.deleteTeamStaff(teamStaffId);
     return ResponseEntity.noContent().build();
   }
 }

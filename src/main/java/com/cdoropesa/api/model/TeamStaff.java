@@ -59,7 +59,7 @@ public class TeamStaff {
    * Rol o función específica que realiza en este equipo (HEAD_COACH, ASSISTANT_COACH, DELEGATE).
    */
   @Enumerated(EnumType.STRING)
-  @Column(name = "role_in_team", nullable = false)
+  @Column(name = "role_in_team", nullable = false, length = 40)
   private StaffRole roleInTeam = StaffRole.HEAD_COACH;
 
   /**

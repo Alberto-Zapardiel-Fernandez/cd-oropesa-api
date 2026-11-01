@@ -90,6 +90,7 @@ public class PlayerController implements PlayersApi {
           Player updatedPlayer = this.playerMapper.toEntity(playerRequest);
           updatedPlayer.setId(existingPlayer.getId());
           updatedPlayer.setCreatedAt(existingPlayer.getCreatedAt());
+          updatedPlayer.setDniFileUrl(existingPlayer.getDniFileUrl());
           Player saved = this.playerService.savePlayer(updatedPlayer);
           return ResponseEntity.ok(this.playerMapper.toResponse(saved));
         })

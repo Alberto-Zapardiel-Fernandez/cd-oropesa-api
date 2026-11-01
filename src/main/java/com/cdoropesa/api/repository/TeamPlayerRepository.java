@@ -1,6 +1,7 @@
 package com.cdoropesa.api.repository;
 
 import com.cdoropesa.api.model.TeamPlayer;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -14,5 +15,7 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface TeamPlayerRepository extends JpaRepository<TeamPlayer, UUID> {
-  // Se añadirán consultas personalizadas según se requieran.
+  List<TeamPlayer> findAllByTeam_Id(UUID teamId);
+
+  boolean existsByTeam_IdAndPlayer_Id(UUID teamId, UUID playerId);
 }

@@ -58,6 +58,12 @@ public class SecurityConfig {
         .authorizeHttpRequests(auth -> auth
             .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
             .requestMatchers("/api/v1/auth/**").permitAll()
+            .requestMatchers(HttpMethod.GET, "/api/v1/players", "/api/v1/players/**").hasRole("ADMIN")
+            .requestMatchers(
+                HttpMethod.GET,
+                "/api/v1/teams/*/players",
+                "/api/v1/teams/*/players/**"
+            ).hasRole("ADMIN")
             .requestMatchers(HttpMethod.GET, "/api/v1/**").permitAll()
             .requestMatchers(HttpMethod.POST, "/api/v1/**").hasRole("ADMIN")
             .requestMatchers(HttpMethod.PUT, "/api/v1/**").hasRole("ADMIN")

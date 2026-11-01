@@ -16,6 +16,8 @@ tags:
     description: Categorías base de competición
   - name: Teams
     description: Equipos federados por temporada
+  - name: TeamPlayers
+    description: Inscripciones de jugadores en equipos
   - name: Players
     description: Maestro de Jugadores y fichas
   - name: Coaches
@@ -346,6 +348,114 @@ paths:
           description: Equipo eliminado con éxito
         '404':
           description: Equipo no encontrado
+
+  /teams/{teamId}/players:
+    get:
+      tags: [TeamPlayers]
+      summary: Listar la plantilla de un equipo
+      operationId: getTeamPlayers
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Plantilla del equipo
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TeamPlayerResponse'
+        '404':
+          description: Equipo no encontrado
+    post:
+      tags: [TeamPlayers]
+      summary: Inscribir un jugador existente en un equipo
+      operationId: addPlayerToTeam
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TeamPlayerCreateRequest'
+      responses:
+        '201':
+          description: Jugador inscrito en el equipo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamPlayerResponse'
+        '404':
+          description: Equipo o jugador no encontrado
+        '409':
+          description: El jugador ya está inscrito en el equipo
+
+  /teams/{teamId}/players/{teamPlayerId}:
+    patch:
+      tags: [TeamPlayers]
+      summary: Actualizar dorsal y estado de una inscripción
+      operationId: updateTeamPlayer
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: teamPlayerId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TeamPlayerUpdateRequest'
+      responses:
+        '200':
+          description: Inscripción actualizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamPlayerResponse'
+        '404':
+          description: Inscripción no encontrada en ese equipo
+    delete:
+      tags: [TeamPlayers]
+      summary: Quitar un jugador de la plantilla
+      operationId: removePlayerFromTeam
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: teamPlayerId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Inscripción eliminada; la ficha del jugador se conserva
+        '404':
+          description: Inscripción no encontrada en ese equipo
 
   # ==========================================
   # PLAYERS
@@ -989,6 +1099,55 @@ components:
           $ref: '#/components/schemas/CategoryResponse'
         season:
           $ref: '#/components/schemas/SeasonResponse'
+
+    TeamPlayerCreateRequest:
+      type: object
+      required: [playerId]
+      properties:
+        playerId:
+          type: string
+          format: uuid
+        dorsal:
+          type: integer
+          minimum: 0
+          maximum: 99
+        status:
+          type: string
+          enum: [PENDING_DOCS, ACTIVE, INACTIVE, EXPIRED_LICENSE]
+          default: PENDING_DOCS
+
+    TeamPlayerUpdateRequest:
+      type: object
+      properties:
+        dorsal:
+          type: integer
+          minimum: 0
+          maximum: 99
+        clearDorsal:
+          type: boolean
+          default: false
+        status:
+          type: string
+          enum: [PENDING_DOCS, ACTIVE, INACTIVE, EXPIRED_LICENSE]
+
+    TeamPlayerResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        playerId:
+          type: string
+          format: uuid
+        firstName:
+          type: string
+        lastName:
+          type: string
+        dorsal:
+          type: integer
+        status:
+          type: string
+          enum: [PENDING_DOCS, ACTIVE, INACTIVE, EXPIRED_LICENSE]
 
     # --- PLAYERS ---
     PlayerRequest:

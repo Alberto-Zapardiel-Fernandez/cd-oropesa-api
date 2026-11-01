@@ -41,6 +41,22 @@ public class TeamPlayerService {
   }
 
   /**
+   * Obtiene las inscripciones de jugadores de un equipo.
+   *
+   * @param teamId Identificador del equipo.
+   * @return Inscripciones del equipo.
+   */
+  @Transactional(readOnly = true)
+  public List<TeamPlayer> findTeamPlayersByTeamId(UUID teamId) {
+    return this.teamPlayerRepository.findAllByTeam_Id(teamId);
+  }
+
+  @Transactional(readOnly = true)
+  public boolean existsPlayerInTeam(UUID teamId, UUID playerId) {
+    return this.teamPlayerRepository.existsByTeam_IdAndPlayer_Id(teamId, playerId);
+  }
+
+  /**
    * Busca una inscripción específica por su identificador único UUID.
    *
    * @param id Identificador único de la inscripción.

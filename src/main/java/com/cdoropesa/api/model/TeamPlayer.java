@@ -17,7 +17,9 @@ import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UuidGenerator;
+import org.hibernate.type.SqlTypes;
 
 /**
  * Entidad JPA que representa la tabla 'team_players' en la base de datos PostgreSQL.
@@ -68,7 +70,8 @@ public class TeamPlayer {
    * Estado administrativo de la ficha del jugador en el equipo (PENDING_DOCS, ACTIVE, etc.).
    */
   @Enumerated(EnumType.STRING)
-  @Column(nullable = false)
+  @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+  @Column(name = "status", nullable = false, columnDefinition = "player_status")
   private PlayerStatus status = PlayerStatus.PENDING_DOCS;
 
   /**

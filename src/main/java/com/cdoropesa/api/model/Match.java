@@ -18,7 +18,9 @@ import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UuidGenerator;
+import org.hibernate.type.SqlTypes;
 
 /**
  * Entidad JPA que representa la tabla 'matches' en la base de datos PostgreSQL.
@@ -98,7 +100,8 @@ public class Match {
    * Estado actual del partido (SCHEDULED, COMPLETED, SUSPENDED, POSTPONED).
    */
   @Enumerated(EnumType.STRING)
-  @Column(nullable = false)
+  @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+  @Column(nullable = false, columnDefinition = "match_status")
   private MatchStatus status = MatchStatus.SCHEDULED;
 
   /**

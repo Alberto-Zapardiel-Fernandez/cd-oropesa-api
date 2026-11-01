@@ -1,5 +1,6 @@
 package com.cdoropesa.api.dto;
 
+import com.cdoropesa.api.model.enums.UserRole;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,4 +16,5 @@ import lombok.Setter;
 @AllArgsConstructor
 public class AuthResponse {
   private String token;
+  private String role;
 }

@@ -1,7 +1,10 @@
 package com.cdoropesa.api.model;
 
+import com.cdoropesa.api.model.enums.UserRole;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -12,10 +15,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 
 /**
  * Entidad JPA que representa a los usuarios del sistema con permisos de acceso
@@ -64,9 +68,13 @@ public class UserEntity implements UserDetails {
   @Column(name = "phone", length = 30)
   private String phone;
 
+  @Enumerated(EnumType.STRING)
+  @Column(name = "role", nullable = false, length = 20)
+  private UserRole role = UserRole.VISITOR;
+
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
-    return Collections.emptyList();
+    return List.of(new SimpleGrantedAuthority("ROLE_" + this.role.name()));
   }
 
   @Override

@@ -8,6 +8,8 @@ servers:
     description: Servidor de Desarrollo Local
 
 tags:
+  - name: Authentication
+    description: Inicio de sesión
   - name: Seasons
     description: Gestión de Temporadas del club
   - name: Categories
@@ -28,6 +30,26 @@ tags:
     description: Tablas de clasificación
 
 paths:
+  /auth/login:
+    post:
+      tags: [ Authentication ]
+      summary: Iniciar sesión
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequestSchema'
+      responses:
+        '200':
+          description: Inicio de sesión correcto
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponseSchema'
+        '401':
+          description: Credenciales incorrectas
   # ==========================================
   # SEASONS
   # ==========================================
@@ -848,6 +870,25 @@ paths:
 
 components:
   schemas:
+    LoginRequestSchema:
+      type: object
+      required: [ email, password ]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+    AuthResponseSchema:
+      type: object
+      required: [ token, role ]
+      properties:
+        token:
+          type: string
+        role:
+          type: string
+          enum: [ ADMIN, COORDINATOR, COACH, VISITOR ]
     # --- SEASONS ---
     SeasonRequest:
       type: object

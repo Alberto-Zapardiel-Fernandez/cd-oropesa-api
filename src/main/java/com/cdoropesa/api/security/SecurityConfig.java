@@ -71,7 +71,7 @@ public class SecurityConfig {
                 "/api/v1/teams/*/staff",
                 "/api/v1/teams/*/staff/**"
             ).hasRole("ADMIN")
-            .requestMatchers(HttpMethod.GET, "/api/v1/**").permitAll()
+            .requestMatchers(HttpMethod.GET, "/api/v1/**").authenticated()
             .requestMatchers(HttpMethod.POST, "/api/v1/**").hasRole("ADMIN")
             .requestMatchers(HttpMethod.PUT, "/api/v1/**").hasRole("ADMIN")
             .requestMatchers(HttpMethod.PATCH, "/api/v1/**").hasRole("ADMIN")

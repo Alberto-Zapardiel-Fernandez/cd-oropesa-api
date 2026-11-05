@@ -57,6 +57,7 @@ public class SecurityConfig {
         .authenticationProvider(this.authenticationProvider)
         .authorizeHttpRequests(auth -> auth
             .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+            .requestMatchers(HttpMethod.GET, "/api/v1/auth/session").authenticated()
             .requestMatchers("/api/v1/auth/**").permitAll()
             .requestMatchers(HttpMethod.GET, "/api/v1/health").permitAll()
             .requestMatchers(HttpMethod.HEAD, "/api/v1/health").permitAll()

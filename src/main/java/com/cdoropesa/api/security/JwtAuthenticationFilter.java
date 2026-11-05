@@ -1,14 +1,16 @@
 package com.cdoropesa.api.security;
 
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -52,19 +54,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     final String jwt = authHeader.substring(7);
-    final String userEmail;
 
     try {
-      userEmail = this.jwtService.extractUsername(jwt);
-    } catch (Exception e) {
-      filterChain.doFilter(request, response);
-      return;
-    }
-
-    if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+      final String userEmail = this.jwtService.extractUsername(jwt);
+      if (userEmail == null) {
+        this.rejectInvalidToken(response);
+        return;
+      }
       UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
 
-      if (this.jwtService.isTokenValid(jwt, userDetails)) {
+      if (!this.jwtService.isTokenValid(jwt, userDetails)) {
+        this.rejectInvalidToken(response);
+        return;
+      }
+
+      if (SecurityContextHolder.getContext().getAuthentication() == null) {
         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
             userDetails,
             null,
@@ -73,8 +77,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContextHolder.getContext().setAuthentication(authToken);
       }
+    } catch (JwtException | IllegalArgumentException | UsernameNotFoundException e) {
+      this.rejectInvalidToken(response);
+      return;
     }
 
     filterChain.doFilter(request, response);
+  }
+
+  private void rejectInvalidToken(HttpServletResponse response) throws IOException {
+    SecurityContextHolder.clearContext();
+    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or expired bearer token");
   }
 }

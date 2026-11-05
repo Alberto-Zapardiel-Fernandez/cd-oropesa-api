@@ -52,6 +52,17 @@ paths:
                 $ref: '#/components/schemas/AuthResponseSchema'
         '401':
           description: Credenciales incorrectas
+  /auth/session:
+    get:
+      tags: [ Authentication ]
+      summary: Validar la sesión actual
+      operationId: validateSession
+      description: Requiere un token JWT válido en el encabezado Authorization.
+      responses:
+        '204':
+          description: La sesión es válida
+        '401':
+          description: Token ausente, inválido o caducado
   # ==========================================
   # SEASONS
   # ==========================================

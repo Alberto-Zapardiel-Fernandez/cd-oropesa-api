@@ -87,6 +87,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
   private void rejectInvalidToken(HttpServletResponse response) throws IOException {
     SecurityContextHolder.clearContext();
-    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or expired bearer token");
+    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+    response.setContentLength(0);
   }
 }
